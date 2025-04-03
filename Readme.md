@@ -1,0 +1,14 @@
+# Tiger Bot
+
+## An Advanced Beta Multipurpose Bot with Slash Commands
+
+### Commands
+
+- Ticket System with Buttons
+- Button Role System
+- Pokémon System
+- Advanced XP System
+- Giveaway System
+- Suggestion and Poll System
+
+And many more commands. This bot is coded by `MisterBashyal` Formerly known as `Pebo_Codez`. If you upload a video on YouTube, please give credits.
