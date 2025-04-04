@@ -6,17 +6,16 @@
     "scripts": {
         "dev": "node index.js"
     },
-    "author": "",
-    "license": "ISC",
+    "author": "MisterBashyal",
     "dependencies": {
         "discord-fight-game": "^1.0.3",
-        "discord-giveaways": "^4.5.0",
+        "discord-giveaways": "^4.5.1",
         "discord-rock-paper-scissor": "^1.2.2",
         "discord.js": "^14.18.0",
         "dotenv": "^16.4.7",
         "mathjs": "^14.4.0",
         "mongodb": "^6.15.0",
-        "mongoose": "^6.0.0",
+        "mongoose": "^6.13.8",
         "pokecord": "^1.0.1"
     }
 }
