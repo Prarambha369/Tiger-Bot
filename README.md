@@ -1,4 +1,3 @@
-
 # Tiger Bot
 
 Tiger Bot is an advanced multipurpose Discord bot with slash commands. Originally developed in 2022, it has been recently reviewed and updated by NextEra Development. This project holds historical significance as it was the first project of NextEra Development.
@@ -52,8 +51,9 @@ We welcome contributions! Please fork the repository and create a pull request w
 
 ## License
 
-This project is licensed under the ISC License.
+This project is licensed under a custom license. It is only usable for personal usages with your own hosting and with visible credit to us. Commercial usage is strictly prohibited. If found, the commercial use company or individual would be charged as theft.
 
 ## Acknowledgements
 
 - Special thanks to the original developers and the NextEra Development team for their efforts in reviewing and updating this project.
+`

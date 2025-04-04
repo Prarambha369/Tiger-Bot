@@ -5,7 +5,8 @@ const { join } = require('path');
 const mongoose = require('mongoose');
 require('dotenv').config();
 
-mongoose.set('strictQuery', true); // Added to suppress the Mongoose warning
+// Added to suppress the Mongoose warning
+mongoose.set('strictQuery', true);
 mongoose.connect(process.env.MONGO_URI, { useUnifiedTopology: true, useNewUrlParser: true });
 
 const client = new Discord.Client({
@@ -70,3 +71,4 @@ process.on("multipleResolves", (type, promise, reason) => {
 });
 
 client.login(process.env.TOKEN);
+
