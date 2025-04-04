@@ -56,4 +56,3 @@ This project is licensed under a custom license. It is only usable for personal 
 ## Acknowledgements
 
 - Special thanks to the original developers and the NextEra Development team for their efforts in reviewing and updating this project.
-`
