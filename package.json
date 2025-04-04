@@ -12,7 +12,7 @@
         "discord-fight-game": "^1.0.3",
         "discord-giveaways": "^4.5.0",
         "discord-rock-paper-scissor": "^1.2.2",
-        "discord.js": "^14.0.0",
+        "discord.js": "^14.18.0",
         "dotenv": "^16.4.7",
         "mathjs": "^14.4.0",
         "mongodb": "^6.15.0",
