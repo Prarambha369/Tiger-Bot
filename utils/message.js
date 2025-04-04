@@ -1,4 +1,4 @@
-const config = require('../config.json');
+const config = require('../../config.json');
 module.exports = {
   giveaway:
     (config.everyoneMention ? "@everyone\n\n" : "") +
@@ -14,4 +14,4 @@ module.exports = {
   hostedBy: "Hosted by: {this.hostedBy}",
   winners: "winner(s)",
   endedAt: "Ended at"
-}
+};

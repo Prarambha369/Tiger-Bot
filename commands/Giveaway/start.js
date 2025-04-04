@@ -33,13 +33,13 @@ module.exports = {
     },
     {
       name: 'bonusrole',
-      description: 'Role which would recieve bonus entries',
+      description: 'Role which would receive bonus entries',
       type: 'ROLE',
       required: false
     },
     {
       name: 'bonusamount',
-      description: 'The amount of bonus entries the role will recieve',
+      description: 'The amount of bonus entries the role will receive',
       type: 'INTEGER',
       required: false
     },
@@ -78,12 +78,14 @@ module.exports = {
         ephemeral: true
       });
     }
-   if(isNaN(ms(giveawayDuration))) {
-    return interaction.reply({
-      content: ':x: Please select a valid duration!',
-      ephemeral: true
-    });
-  }
+
+    if (isNaN(ms(giveawayDuration))) {
+      return interaction.reply({
+        content: ':x: Please select a valid duration!',
+        ephemeral: true
+      });
+    }
+
     if (giveawayWinnerCount < 1) {
       return interaction.reply({
         content: ':x: Please select a valid winner count! greater or equal to one.',
@@ -98,12 +100,11 @@ module.exports = {
     if (bonusRole) {
       if (!bonusEntries) {
         return interaction.reply({
-          content: `:x: You must specify how many bonus entries would ${bonusRole} recieve!`,
+          content: `:x: You must specify how many bonus entries ${bonusRole} will receive!`,
           ephemeral: true
         });
       }
     }
-
 
     await interaction.deferReply({ ephemeral: true })
     let reqinvite;
@@ -124,7 +125,7 @@ module.exports = {
             title: "Server Check!",
             url: "https://youtube.com/c/ZeroSync",
             description:
-              "Woah woah woah! I see a new server! are you sure I am in that? You need to invite me there to set that as a requirement! 😳",
+              "Woah woah woah! I see a new server! Are you sure I am in that? You need to invite me there to set that as a requirement! 😳",
             timestamp: new Date(),
             footer: {
               iconURL: client.user.displayAvatarURL(),
@@ -139,12 +140,11 @@ module.exports = {
       messages.inviteToParticipate = `**React with 🎉 to participate!**\n>>> - Only members having ${rolereq} are allowed to participate in this giveaway!`
     }
     if (rolereq && invite) {
-      messages.inviteToParticipate = `**React with 🎉 to participate!**\n>>> - Only members having ${rolereq} are allowed to participate in this giveaway!\n- Members are required to join [this server](${invite}) to participate in this giveaway!`
+      messages.inviteToParticipate = `**React with 🎉 to participate!**\n>>> - Only members having ${rolereq} are allowed to participate in this giveaway!\n- Members are required to join [this server](${invite}) to participate in this giveaway!`;
     }
     if (!rolereq && invite) {
       messages.inviteToParticipate = `**React with 🎉 to participate!**\n>>> - Members are required to join [this server](${invite}) to participate in this giveaway!`
     }
-
 
     // start giveaway
     client.giveawaysManager.start(giveawayChannel, {
@@ -179,7 +179,7 @@ module.exports = {
       let giveaway = new Discord.MessageEmbed()
         .setAuthor({ name: `Bonus Entries Alert!` })
         .setDescription(
-          `**${bonusRole}** Has **${bonusEntries}** Extra Entries in this giveaway!`
+          `**${bonusRole}** has **${bonusEntries}** extra entries in this giveaway!`
         )
         .setColor("#2F3136")
         .setTimestamp();
