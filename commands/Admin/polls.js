@@ -1,4 +1,3 @@
-const { find } = require('node-emoji');
 const polls = require("../../models/polls")
 const { MessageButton, MessageActionRow } = require('discord.js');
 
