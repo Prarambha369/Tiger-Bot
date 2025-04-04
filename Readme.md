@@ -21,7 +21,16 @@ To start the bot, first install the dependencies using the following command:
 npm install
 ```
 
-Then, use the following command to start the bot:
+Then, create a `.env` file in the root directory and add the following environment variables:
+
+```dotenv
+TOKEN=your_discord_bot_token
+MONGO_URI=your_mongodb_connection_string
+CLIENT_ID=your_discord_client_id
+OWNER_ID=your_discord_owner_id
+```
+
+Finally, use the following command to start the bot:
 
 ```sh
 npm run dev
