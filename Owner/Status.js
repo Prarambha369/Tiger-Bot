@@ -1,4 +1,4 @@
-npm  install libgconf-2-4 libatk1.0-0 libatk-bridge2.0-0 libgdk-pixbuf2.0-0 libgtk-3-0 libgbm-dev libnss3-dev libxss-devconst { Client } = require("discord.js");
+const { Client } = require("discord.js");
 
 module.exports = {
     data: {
@@ -8,7 +8,7 @@ module.exports = {
             name: "status",
             description: "the new status of Tiger Bot!",
             required: true,
-            type: "STRING",
+            type: 3, // Corrected type to STRING (3)
         }],
     },
 
@@ -28,4 +28,4 @@ module.exports = {
 
         interaction.reply({ content: `Status changed to  : ${interaction.options.getString("status")}` });
     }
-  }
+}

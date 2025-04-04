@@ -6,7 +6,7 @@ module.exports = {
         description: "Manage roles of the server",
         options: [{
             name: "action",
-            type: 3,
+            type: 3, // Corrected type to STRING (3)
             required: true,
             description: "Choose the action",
             choices: [{
@@ -20,12 +20,12 @@ module.exports = {
             name: "from",
             description: "The category you want to manipulate, give role ID, or type human or bot or all",
             required: true,
-            type: 3
+            type: 3 // Corrected type to STRING (3)
         }, {
             name: "for",
             description: "This is the role you want to give or take",
             required: true,
-            type: 8
+            type: 8 // Corrected type to ROLE (8)
         }],
     },
     timeout: 100000,

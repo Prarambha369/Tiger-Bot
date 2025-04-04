@@ -7,7 +7,7 @@ module.exports = {
         {
             name: 'giveaway',
             description: 'The giveaway to resume (message ID or giveaway prize)',
-            type: 'STRING',
+            type: 3, // Corrected type to STRING (3)
             required: true
         }
     ]},

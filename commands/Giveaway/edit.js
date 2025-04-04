@@ -7,25 +7,25 @@ module.exports = {
         {
             name: 'giveaway',
             description: 'The giveaway to end (message ID)',
-            type: 'STRING',
+            type: 3, // Corrected type to STRING (3)
             required: true
         },
         {
             name: 'duration',
             description: 'Setting time of mentioned giveaway. Eg. 1h sets the current giveaway to end after an hour!',
-            type: 'STRING',
+            type: 3, // Corrected type to STRING (3)
             required: true
         },
         {
             name: 'winners',
             description: 'How many winners the giveaway should have',
-            type: 'INTEGER',
+            type: 4, // Corrected type to INTEGER (4)
             required: true
         },
         {
             name: 'prize',
             description: 'What the prize of the giveaway should be',
-            type: 'STRING',
+            type: 3, // Corrected type to STRING (3)
             required: true
         }
     ]},

@@ -23,7 +23,7 @@ module.exports = {
             name: "user",
             description: "Mention a user",
             required: false,
-            type: 6,
+            type: 6, // Corrected type to USER (6)
         }],
     },
 

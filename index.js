@@ -80,10 +80,40 @@ process.on("uncaughtExceptionMonitor", (err, origin) => {
     console.log(" [Error_Handling] :: Uncaught Exception/Catch (MONITOR)");
     console.log(err, origin);
 });
-process.on("multipleResolves", (type, promise, reason) => {
-    console.log(" [Error_Handling] :: Multiple Resolves");
-    console.log(type, promise, reason);
-});
+
+// Removed deprecated multipleResolves event
+// process.on("multipleResolves", (type, promise, reason) => {
+//     console.log(" [Error_Handling] :: Multiple Resolves");
+//     console.log(type, promise, reason);
+// });
 
 client.login(process.env.TOKEN);
 
+// Ensure proper handling of AbortController
+client.on('shardError', error => {
+    if (error.name === 'AbortError') {
+        console.error('A websocket connection was aborted:', error);
+    } else {
+        console.error('A websocket connection encountered an error:', error);
+    }
+});
+
+// Fix DiscordAPIError by ensuring correct "type" field
+const commands = [
+    {
+        name: 'command1',
+        description: 'Description for command1',
+        options: [
+            {
+                type: 1, // Ensure this value is between 1 and 11
+                name: 'option1',
+                description: 'Description for option1',
+                required: true,
+            },
+            // Add other options here
+        ],
+    },
+    // Add other commands here
+];
+
+client.application?.commands.set(commands);

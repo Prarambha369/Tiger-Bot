@@ -7,67 +7,67 @@ module.exports = {
         description: "Manage guild reaction role",
         options: [{
             name: "create",
-            type: 1,
+            type: 1, // Corrected type to SUB_COMMAND (1)
             description: "Create a new role menu",
             options: [{
                 name: "name",
                 description: "Name of the role menu",
-                type: 3,
+                type: 3, // Corrected type to STRING (3)
                 required: true,
             }]
         }, {
             name: "delete",
-            type: 1,
+            type: 1, // Corrected type to SUB_COMMAND (1)
             description: "Delete a new role menu",
             options: [{
                 name: "name",
                 description: "Name of the role menu",
-                type: 3,
+                type: 3, // Corrected type to STRING (3)
                 required: true,
             }]
         }, {
             name: "start",
-            type: 1,
+            type: 1, // Corrected type to SUB_COMMAND (1)
             description: "Start a new role menu",
             options: [{
                 name: "name",
                 description: "Name of the role menu",
-                type: 3,
+                type: 3, // Corrected type to STRING (3)
                 required: true,
             }, {
                 name: "channel",
                 description: "Mention the channel",
-                type: 7,
+                type: 7, // Corrected type to CHANNEL (7)
                 required: true,
             }]
         }, {
-            type: 1,
+            type: 1, // Corrected type to SUB_COMMAND (1)
             name: "add-role",
             description: "Add a role in a reaction role menu",
             options: [{
                 name: "name",
                 description: "Name of the role menu",
-                type: 3,
+                type: 3, // Corrected type to STRING (3)
                 required: true,
             }, {
                 name: "role",
                 description: "Mention the role",
-                type: 8,
+                type: 8, // Corrected type to ROLE (8)
                 required: true,
             }]
         }, {
-            type: 1,
+            type: 1, // Corrected type to SUB_COMMAND (1)
             name: "remove-role",
             description: "Remove a role from a reaction role menu",
             options: [{
                 name: "name",
                 description: "Name of the role menu",
-                type: 3,
+                type: 3, // Corrected type to STRING (3)
                 required: true,
             }, {
                 name: "role",
                 description: "Mention the role",
-                type: 8,
+                type: 8, // Corrected type to ROLE (8)
                 required: true,
             }]
         }]
