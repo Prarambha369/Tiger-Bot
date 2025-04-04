@@ -1,11 +1,4 @@
 const { MessageAttachment } = require('discord.js');
-
-
-module.exports = async (client) => {
-    console.log("Client is up");
-
-    
-    client.application.commands.set([...client.commands.map(v => v.data)]);
-
-    
-}
+module.exports = (client) => {
+    console.log(`Logged in as ${client.user.tag}!`);
+};
