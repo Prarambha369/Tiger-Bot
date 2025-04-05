@@ -1,45 +1,35 @@
-const { CommandInteraction } = require('discord.js');
+const { SlashCommandBuilder } = require('discord.js');
 const stats = require('../../models/guildStats');
 
 module.exports = {
-    data: {
-        name: "stats",
-        description: "Configure the stats for your server",
-        options: [{
-            name: "type",
-            type: 3,
-            required: true,
-            description: "What kind of stats you want to setup",
-            choices: [{
-                name: "members-stats",
-                value: "members"
-            }]
-        }, {
-            name: "channel",
-            type: 7,
-            required: false,
-            description: "The voice channel in which you wanna show the stats"
-        }]
-    },
-    permissions: ["MANAGE_GUILD", "MANAGE_CHANNELS"],
+    data: new SlashCommandBuilder()
+        .setName('stats')
+        .setDescription('Configure the stats for your server')
+        .addStringOption(option =>
+            option.setName('type')
+                .setDescription('What kind of stats you want to setup')
+                .setRequired(true)
+                .addChoices(
+                    { name: 'members-stats', value: 'members' },
+                    { name: 'server-stats', value: 'server' }
+                ))
+        .addChannelOption(option =>
+            option.setName('channel')
+                .setDescription('The voice channel in which you wanna show the stats')
+                .setRequired(false)),
 
-    /**
-     * 
-     * @param {*} client 
-     * @param {CommandInteraction} interaction 
-     */
-    run: async (client, interaction) => {
-        interaction.deferReply();
-        const channel = interaction.options.getChannel("channel") || await interaction.guild.channels.create(`Members : ${interaction.guild.memberCount}`, {
-            reason: "for stats",
-            type: "GUILD_VOICE"
+    async execute(interaction) {
+        await interaction.deferReply();
+        const channel = interaction.options.getChannel('channel') || await interaction.guild.channels.create(`Members : ${interaction.guild.memberCount}`, {
+            reason: 'for stats',
+            type: 'GUILD_VOICE'
         });
 
         const newData = { guild: interaction.guildId };
-        newData[interaction.options.getString("type")] = channel.id;
+        newData[interaction.options.getString('type')] = channel.id;
 
         const data = await stats.findOneAndUpdate({ guild: interaction.guildId }, newData, { new: true }) || await stats.create(newData);
 
-        interaction.editReply({ content: `Added stats for ${interaction.options.getString("type")}` });
-    }
-}
+        await interaction.editReply({ content: `Added stats for ${interaction.options.getString('type')}` });
+    },
+};

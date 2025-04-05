@@ -5,7 +5,7 @@ const { MessageEmbed, MessageActionRow, MessageButton, CommandInteraction } = re
 module.exports = {
     data: {
         name: "ticket",
-        description: "COnfigure your server's tickets / panels",
+        description: "Configure your server's tickets / panels",
         options: [{
             name: "create",
             type: 1,
@@ -44,7 +44,7 @@ module.exports = {
         }, {
             name: "close",
             type: 1,
-            description: "Close a openen ticket for your discord server",
+            description: "Close an open ticket for your discord server",
         }, {
             name: "re-open",
             type: 1,
@@ -75,7 +75,7 @@ module.exports = {
             }, {
                 name: "channel",
                 type: 7,
-                description: "channel to send ticket logs for your server",
+                description: "Channel to send ticket logs for your server",
                 required: true
             }]
         }, {
@@ -141,7 +141,7 @@ module.exports = {
         }, {
             name: "max-ticket",
             type: 1,
-            description: "Set maximum number of tickets a user can create in a pannel",
+            description: "Set maximum number of tickets a user can create in a panel",
             options: [{
                 name: "panel-name",
                 description: "The name of the panel",
@@ -165,206 +165,228 @@ module.exports = {
      */
     run: async (client, interaction) => {
         await interaction.deferReply();
+        const command = interaction.options.getSubcommand();
+        const commandHandlers = {
+            'create': createPanel,
+            'remove': removePanel,
+            'start': startPanel,
+            'close': closeTicket,
+            're-open': reopenTicket,
+            'delete': deleteTicket,
+            'logs-disable': disableLogs,
+            'logs-enable': enableLogs,
+            'moderator-add': addModerator,
+            'moderator-remove': removeModerator,
+            'banned-add': addBanned,
+            'banned-remove': removeBanned,
+            'max-ticket': setMaxTicket
+        };
 
-        const name = interaction.options.getString("panel-name"),
-            ticketData = await ticket.findOne({ guild: interaction.guildId, channel: interaction.channel.id }) || {},
-            data = await tickets.findOne({ guild: interaction.guildId, name }) || await tickets.findOne({ guild: interaction.guildId, name: ticketData.panel }),
-            command = interaction.options.getSubcommand(),
-            channel = interaction.options.getChannel("channel"),
-            role = interaction.options.getRole("role"),
-            limit = interaction.options.getInteger("limit"),
-            modCommands = ["close", "reopen", "delete"],
-            permissions = ["MANAGA_SERVER", "MANAGE_CHANNELS"],
-            member = interaction.guild.members.cache.get(ticketData?.user);
-
-        if (modCommands.includes(command) && !data?.moderators.some(v => interaction.member.roles.cache.has(v)) && !permissions.some(v => interaction.member.permissions.has(v)))
-            return interaction.editReply({ content: `You can not use this command, because you neither have moderator role for this pannel nor any of the following permission ${permissions.join(", ")}` })
-
-        if (!modCommands.includes(command) && !permissions.some(v => interaction.member.permissions.has(v)))
-            return interaction.editReply({ content: `You can not use this command, because you do not have any of the following permission ${permissions.join(", ")}` })
-
-        if (command === "create") {
-            if (data) return interaction.editReply({ content: `You already have a panel with name \`${name}\`` });
-            await tickets.create({ name, guild: interaction.guildId });
-
-            interaction.editReply({ content: `I created a panel with name \`${name}\`` });
-        } else if (command === "remove") {
-            if (!data) return interaction.editReply({ content: `You do not have a panel with name \`${name}\`` });
-            await tickets.findOneAndDelete({ name, guild: interaction.guildId });
-
-            interaction.editReply({ content: `I delete the panel with name \`${name}\`` });
-        } else if (command === "start") {
-            if (!data) return interaction.editReply({ content: `You do not have a panel with name \`${name}\`` });
-            if (channel.type !== "GUILD_TEXT") return interaction.editReply({ content: "Channel should be a text channel" });
-
-            const embed = new MessageEmbed().setTitle(`Panel : ${name}`).setDescription("click on <a:Ticket7:962175422567702578> to create a ticket").setColor('#353A3C');
-            const row = new MessageActionRow().addComponents(new MessageButton().setCustomId("ticket_button").setLabel("Create Ticket").setEmoji("962175422567702578").setStyle("PRIMARY"));
-
-            channel?.send({ embeds: [embed], components: [row] }).then(async v => {
-                console.log(v)
-                await tickets.findOneAndUpdate({ guild: interaction.guildId, name }, { message: v.id });
-                interaction.editReply({ content: `Successfully started the panel with name : \`${name}\` in ${channel.toString()}` })
-            }).catch(e => {
-                interaction.editReply({ content: `Unable to send the message in ${channel.toString()}` })
-            })
-        } else if (command === "logs-disable") {
-            if (!data) return interaction.editReply({ content: `You do not have a panel with name \`${name}\`` });
-
-            await tickets.findOneAndUpdate({ guild: interaction.guildId, name }, { logs: "0" });
-            interaction.editReply({ content: "Successfully disabled Ticket logs for this server." });
-        } else if (command === "logs-enable") {
-            if (!data) return interaction.editReply({ content: `You do not have a panel with name \`${name}\`` });
-
-            if (channel.type !== "GUILD_TEXT") return interaction.editReply({ content: "Channel should be a text channel" });
-
-            await tickets.findOneAndUpdate({ guild: interaction.guildId, name }, { logs: channel.id });
-            interaction.editReply({ content: "Successfully enable Ticket logs for this server in " + channel.toString() });
-        } else if (command === "moderator-add") {
-            if (!data) return interaction.editReply({ content: `You do not have a panel with name \`${name}\`` });
-            if (data.moderators?.includes(role.id)) return interaction.editReply({ content: `This role is already a moderator role in the panel \`${data.name}\`` });
-
-            await tickets.findOneAndUpdate({ guild: interaction.guildId, name }, { $push: { moderators: role.id } });
-            interaction.editReply({ content: `Successfully added **${role.name}** as a moderator role in the panel \`${data.name}\`` });
-        } else if (command === "moderator-remove") {
-            if (!data) return interaction.editReply({ content: `You do not have a panel with name \`${name}\`` });
-            if (!data.moderators?.includes(role.id)) return interaction.editReply({ content: `This role is not a moderator role in the panel \`${data.name}\`` });
-
-            await tickets.findOneAndUpdate({ guild: interaction.guildId, name }, { $pull: { moderators: { $in: role.id } } });
-            interaction.editReply({ content: `Successfully remove **${role.name}** from moderator roles in the panel \`${data.name}\`` });
-        } else if (command === "banned-add") {
-            if (!data) return interaction.editReply({ content: `You do not have a panel with name \`${name}\`` });
-            if (data.banned?.includes(role.id)) return interaction.editReply({ content: `This role is already a banned role in the panel \`${data.name}\`` });
-
-            await tickets.findOneAndUpdate({ guild: interaction.guildId, name }, { $push: { banned: role.id } });
-            interaction.editReply({ content: `Successfully added **${role.name}** as a banned role in the panel \`${data.name}\`` });
-        } else if (command === "banned-remove") {
-            if (!data) return interaction.editReply({ content: `You do not have a panel with name \`${name}\`` });
-            if (!data.banned?.includes(role.id)) return interaction.editReply({ content: `This role is not a banned role in the panel \`${data.name}\`` });
-
-            await tickets.findOneAndUpdate({ guild: interaction.guildId, name }, { $pull: { banned: { $in: role.id } } });
-            interaction.editReply({ content: `Successfully remove **${role.name}** from banned roles in the panel \`${data.name}\`` });
-        } else if (command === "max-ticket") {
-            if (!data) return interaction.editReply({ content: `You do not have a panel with name \`${name}\`` });
-            if (limit < 1 || limit > 1000) return interaction.editReply({ content: "The maximum ticket limit can't be less than 1 or greater than 1000" });
-
-            await tickets.findOneAndUpdate({ guild: interaction.guildId, name }, { max: limit });
-            interaction.editReply({ content: `Successfully setted maximum ticket limit to **${limit}** in the panel \`${data.name}\`` });
+        if (commandHandlers[command]) {
+            await commandHandlers[command](interaction);
         } else {
-            if (!ticketData || !ticketData.panel) return interaction.editReply({ content: "This is not a ticket channel." });
-
-            let user = interaction.guild.members.cache.get(ticketData?.user);
-
-            if (command === "close") {
-                if (ticketData.closed) return interaction.editReply({ content: "This ticket is already closed" });
-                interaction.channel.permissionOverwrites.create(user, {
-                    VIEW_CHANNEL: false,
-                    SEND_MESSAGES: false,
-                });
-
-                await ticket.findOneAndUpdate({ channel: interaction.channel.id }, { closed: true });
-
-                interaction.editReply({ content: "This ticket is now closed" });
-
-                interaction.guild.channels.cache.get(data.logs)?.send({
-                    embeds: [{
-                        title: "Ticket closed",
-                        timestamps: Date.now(),
-                        fields: [{
-                            name: "Panel",
-                            value: data.name,
-                            inline: true
-                        }, {
-                            name: "User",
-                            value: member.user.username,
-                            inline: true
-                        }, {
-                            name: "Ticket",
-                            value: interaction.channel.toString(),
-                            inline: true
-                        }, {
-                            name: "\u200b",
-                            value: "\u200b",
-                            inline: true
-                        }, {
-                            name: "Moderator",
-                            value: interaction.user.username,
-                            inline: true
-                        }]
-                    }]
-                })
-            } else if (command === "re-open") {
-                if (!ticketData.closed) return interaction.editReply({ content: "This ticket is not closed" });
-                interaction.channel.permissionOverwrites.create(user, {
-                    VIEW_CHANNEL: true,
-                    SEND_MESSAGES: true,
-                });
-
-                await ticket.findOneAndUpdate({ channel: interaction.channel.id }, { closed: false });
-
-                interaction.editReply({ content: "This ticket is now re-opened" });
-                interaction.guild.channels.cache.get(data.logs)?.send({
-                    embeds: [{
-                        title: "Ticket re-opened",
-                        timestamps: Date.now(),
-                        fields: [{
-                            name: "Panel",
-                            value: data.name,
-                            inline: true
-                        }, {
-                            name: "User",
-                            value: member.user.username,
-                            inline: true
-                        }, {
-                            name: "Ticket",
-                            value: interaction.channel.toString(),
-                            inline: true
-                        }, {
-                            name: "\u200b",
-                            value: "\u200b",
-                            inline: true
-                        }, {
-                            name: "Moderator",
-                            value: interaction.user.username,
-                            inline: true
-                        }]
-                    }]
-                })
-            } else if (command === "delete") {
-                interaction.editReply({ content: "This ticket is closed and channel will be deleted in few seconds" });
-                await ticket.findOneAndDelete({ channel: interaction.channel.id });
-                await new Promise(res => setTimeout(res, 2000));
-
-                interaction.channel.delete().catch(e => {
-                    interaction.editReply({ content: "Ticket was deleted from database but i was unable to delete this channel" });
-                })
-                interaction.guild.channels.cache.get(data.logs)?.send({
-                    embeds: [{
-                        title: "Ticket deleted",
-                        timestamps: Date.now(),
-                        fields: [{
-                            name: "Panel",
-                            value: data.name,
-                            inline: true
-                        }, {
-                            name: "User",
-                            value: member.user.username,
-                            inline: true
-                        }, {
-                            name: "Ticket",
-                            value: interaction.channel.toString(),
-                            inline: true
-                        }, {
-                            name: "\u200b",
-                            value: "\u200b",
-                            inline: true
-                        }, {
-                            name: "Moderator",
-                            value: interaction.user.username,
-                            inline: true
-                        }]
-                    }]
-                })
-            }
+            await interaction.editReply({ content: 'Unknown command' });
         }
     }
+}
+
+async function createPanel(interaction) {
+    const name = interaction.options.getString('panel-name');
+    const data = await tickets.findOne({ guild: interaction.guildId, name });
+    if (data) {
+        return interaction.editReply({ content: `You already have a panel with name \`${name}\`` });
+    }
+    await tickets.create({ name, guild: interaction.guildId });
+    interaction.editReply({ content: `I created a panel with name \`${name}\`` });
+}
+
+async function removePanel(interaction) {
+    const name = interaction.options.getString('panel-name');
+    const data = await tickets.findOne({ guild: interaction.guildId, name });
+    if (!data) {
+        return interaction.editReply({ content: `You do not have a panel with name \`${name}\`` });
+    }
+    await tickets.findOneAndDelete({ name, guild: interaction.guildId });
+    interaction.editReply({ content: `I deleted the panel with name \`${name}\`` });
+}
+
+async function startPanel(interaction) {
+    const name = interaction.options.getString('panel-name');
+    const channel = interaction.options.getChannel('channel');
+    const data = await tickets.findOne({ guild: interaction.guildId, name });
+    if (!data) {
+        return interaction.editReply({ content: `You do not have a panel with name \`${name}\`` });
+    }
+    if (channel.type !== "GUILD_TEXT") {
+        return interaction.editReply({ content: "Channel should be a text channel" });
+    }
+
+    const embed = new MessageEmbed().setTitle(`Panel : ${name}`).setDescription("Click on <a:Ticket7:962175422567702578> to create a ticket").setColor('#353A3C');
+    const row = new MessageActionRow().addComponents(new MessageButton().setCustomId("ticket_button").setLabel("Create Ticket").setEmoji("962175422567702578").setStyle("PRIMARY"));
+
+    channel.send({ embeds: [embed], components: [row] }).then(async v => {
+        await tickets.findOneAndUpdate({ guild: interaction.guildId, name }, { message: v.id });
+        interaction.editReply({ content: `Successfully started the panel with name : \`${name}\` in ${channel.toString()}` });
+    }).catch(e => {
+        interaction.editReply({ content: `Unable to send the message in ${channel.toString()}` });
+    });
+}
+
+async function handleTicketOperation(interaction, operation) {
+    const ticketData = await ticket.findOne({ guild: interaction.guildId, channel: interaction.channel.id });
+    const data = await tickets.findOne({ guild: interaction.guildId, name: ticketData?.panel });
+    const member = interaction.guild.members.cache.get(ticketData?.user);
+
+    if (!ticketData || !ticketData.panel) {
+        return interaction.editReply({ content: "This is not a ticket channel." });
+    }
+
+    await operation(interaction, ticketData, data, member);
+}
+
+async function closeTicket(interaction) {
+    await handleTicketOperation(interaction, async (interaction, ticketData, data, member) => {
+        if (ticketData.closed) {
+            return interaction.editReply({ content: "This ticket is already closed" });
+        }
+
+        await updateTicketStatus({ interaction, member, viewChannel: false, sendMessages: true, logTitle: "Ticket closed", replyMessage: "This ticket is now closed" });
+    });
+}
+
+async function reopenTicket(interaction) {
+    await handleTicketOperation(interaction, async (interaction, ticketData, data, member) => {
+        if (!ticketData.closed) {
+            return interaction.editReply({ content: "This ticket is not closed" });
+        }
+
+        await updateTicketStatus({ interaction, member, viewChannel: true, sendMessages: false, logTitle: "Ticket re-opened", replyMessage: "This ticket is now re-opened" });
+    });
+}
+
+async function deleteTicket(interaction) {
+    await handleTicketOperation(interaction, async (interaction, ticketData, data, member) => {
+        interaction.editReply({ content: "This ticket is closed and channel will be deleted in few seconds" });
+        await ticket.findOneAndDelete({ channel: interaction.channel.id });
+        await new Promise(res => setTimeout(res, 2000));
+
+        interaction.channel.delete().catch(e => {
+            interaction.editReply({ content: "Ticket was deleted from database but I was unable to delete this channel" });
+        });
+
+        interaction.guild.channels.cache.get(data.logs)?.send({
+            embeds: [{
+                title: "Ticket deleted",
+                timestamps: Date.now(),
+                fields: [
+                    { name: "Panel", value: data.name, inline: true },
+                    { name: "User", value: member.user.username, inline: true },
+                    { name: "Ticket", value: interaction.channel.toString(), inline: true },
+                    { name: "\u200b", value: "\u200b", inline: true },
+                    { name: "Moderator", value: interaction.user.username, inline: true }
+                ]
+            }]
+        });
+    });
+}
+
+async function handleLogOperation(interaction, operation) {
+    const name = interaction.options.getString('panel-name');
+    const data = await tickets.findOne({ guild: interaction.guildId, name });
+    if (!data) {
+        return interaction.editReply({ content: `You do not have a panel with name \`${name}\`` });
+    }
+
+    await operation(interaction, data);
+}
+
+async function disableLogs(interaction) {
+    await handleLogOperation(interaction, async (interaction, data) => {
+        await tickets.findOneAndUpdate({ guild: interaction.guildId, name: data.name }, { logs: "0" });
+        interaction.editReply({ content: "Successfully disabled Ticket logs for this server." });
+    });
+}
+
+async function enableLogs(interaction) {
+    await handleLogOperation(interaction, async (interaction, data) => {
+        const channel = interaction.options.getChannel('channel');
+        if (channel.type !== "GUILD_TEXT") {
+            return interaction.editReply({ content: "Channel should be a text channel" });
+        }
+        await tickets.findOneAndUpdate({ guild: interaction.guildId, name: data.name }, { logs: channel.id });
+        interaction.editReply({ content: "Successfully enabled Ticket logs for this server in " + channel.toString() });
+    });
+}
+
+async function addModerator(interaction) {
+    await handleRoleOperation(interaction, 'moderators', 'add', `Successfully added **${role.name}** as a moderator role in the panel \`${data.name}\``);
+}
+
+async function removeModerator(interaction) {
+    await handleRoleOperation(interaction, 'moderators', 'remove', `Successfully removed **${role.name}** from moderator roles in the panel \`${data.name}\``);
+}
+
+async function addBanned(interaction) {
+    await handleRoleOperation(interaction, 'banned', 'add', `Successfully added **${role.name}** as a banned role in the panel \`${data.name}\``);
+}
+
+async function removeBanned(interaction) {
+    await handleRoleOperation(interaction, 'banned', 'remove', `Successfully removed **${role.name}** from banned roles in the panel \`${data.name}\``);
+}
+
+async function setMaxTicket(interaction) {
+    const name = interaction.options.getString('panel-name');
+    const limit = interaction.options.getInteger('limit');
+    const data = await tickets.findOne({ guild: interaction.guildId, name });
+    if (!data) {
+        return interaction.editReply({ content: `You do not have a panel with name \`${name}\`` });
+    }
+    if (limit < 1 || limit > 1000) {
+        return interaction.editReply({ content: "The maximum ticket limit can't be less than 1 or greater than 1000" });
+    }
+    await tickets.findOneAndUpdate({ guild: interaction.guildId, name }, { max: limit });
+    interaction.editReply({ content: `Successfully set maximum ticket limit to **${limit}** in the panel \`${data.name}\`` });
+}
+
+async function updateTicketStatus({ interaction, member, viewChannel, sendMessages, logTitle, replyMessage }) {
+    interaction.channel.permissionOverwrites.create(member, {
+        VIEW_CHANNEL: viewChannel,
+        SEND_MESSAGES: sendMessages,
+    });
+
+    await ticket.findOneAndUpdate({ channel: interaction.channel.id }, { closed: !viewChannel });
+    interaction.editReply({ content: replyMessage });
+
+    interaction.guild.channels.cache.get(data.logs)?.send({
+        embeds: [{
+            title: logTitle,
+            timestamps: Date.now(),
+            fields: [
+                { name: "Panel", value: data.name, inline: true },
+                { name: "User", value: member.user.username, inline: true },
+                { name: "Ticket", value: interaction.channel.toString(), inline: true },
+                { name: "\u200b", value: "\u200b", inline: true },
+                { name: "Moderator", value: interaction.user.username, inline: true }
+            ]
+        }]
+    });
+}
+
+async function handleRoleOperation(interaction, roleType, operation, successMessage) {
+    const name = interaction.options.getString('panel-name');
+    const role = interaction.options.getRole('role');
+    const data = await tickets.findOne({ guild: interaction.guildId, name });
+    if (!data) {
+        return interaction.editReply({ content: `You do not have a panel with name \`${name}\`` });
+    }
+    const roleList = data[roleType] || [];
+    if (operation === 'add' && roleList.includes(role.id)) {
+        return interaction.editReply({ content: `This role is already a ${roleType.slice(0, -1)} role in the panel \`${data.name}\`` });
+    }
+    if (operation === 'remove' && !roleList.includes(role.id)) {
+        return interaction.editReply({ content: `This role is not a ${roleType.slice(0, -1)} role in the panel \`${data.name}\`` });
+    }
+    const update = operation === 'add' ? { $push: { [roleType]: role.id } } : { $pull: { [roleType]: { $in: role.id } } };
+    await tickets.findOneAndUpdate({ guild: interaction.guildId, name }, update);
+    interaction.editReply({ content: successMessage });
 }
